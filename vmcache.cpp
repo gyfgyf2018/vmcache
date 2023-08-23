@@ -20,7 +20,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <immintrin.h>
+// #include <immintrin.h>
 
 #include "exmap.h"
 
@@ -42,14 +42,17 @@ struct alignas(4096) Page {
    bool dirty;
 };
 
-static const int16_t maxWorkerThreads = 256;
+static const int16_t maxWorkerThreads = 32;
 
 #define die(msg) do { perror(msg); exit(EXIT_FAILURE); } while(0)
 
 uint64_t rdtsc() {
-   uint32_t hi, lo;
-   __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
-   return static_cast<uint64_t>(lo)|(static_cast<uint64_t>(hi)<<32);
+   // uint32_t hi, lo;
+   // __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
+   // return static_cast<uint64_t>(lo)|(static_cast<uint64_t>(hi)<<32);
+   uint64_t val;
+   asm volatile ("mrs %0, cntvct_el0" :"=r"(val));
+   return val;
 }
 
 // exmap helper function
@@ -67,7 +70,7 @@ void* allocHuge(size_t size) {
 
 // use when lock is not free
 void yield(u64 counter) {
-   _mm_pause();
+   // _mm_pause();
 }
 
 struct PageState {
